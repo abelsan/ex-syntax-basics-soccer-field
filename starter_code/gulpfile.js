@@ -36,22 +36,26 @@ function send(data) {
             child_process.exec(`git config user.${cat}`, function(err, out, code) {
                 if (err) {
                     d.reject(err);
-                } else {
+                }
+                else {
                     auth[cat] = out.trim();
                     d.resolve();
                 }
             });
-        } else if (task.type == 'travis' || task.type == 'docker') {
+        }
+        else if (task.type == 'travis' || task.type == 'docker') {
             var symbol;
             if (cat == 'email') {
                 symbol = 'E';
-            } else if (cat == 'name') {
+            }
+            else if (cat == 'name') {
                 symbol = 'n';
             }
             child_process.exec(`git log -1 ${auth.commit_id} --pretty=%a${symbol}`, function(err, out, code) {
                 if (err) {
                     d.reject(err);
-                } else {
+                }
+                else {
                     auth[cat] = out.trim();
                     d.resolve();
                 }
@@ -80,7 +84,7 @@ function send(data) {
     function travis() {
         task.type = 'travis';
         auth['job_id'] = process.env.TRAVIS_JOB_ID;
-        auth['commit_id'] = process.env.TRAVIS_COMMIT_ID;
+        auth['commit_id'] = process.env.TRAVIS_COMMIT;
         return name().then(email);
     }
 
@@ -98,10 +102,11 @@ function send(data) {
                 data: data
             },
             json: true
-        }, function(err, res, body) {
+        }, function (err, res, body) {
             if (err) {
                 d.reject(err);
-            } else {
+            }
+            else {
                 d.resolve(body);
             }
         });
@@ -111,9 +116,11 @@ function send(data) {
     function id() {
         if (process.env.DOCKER_TASK_ID) {
             return docker();
-        } else if (process.env.TRAVIS_JOB_ID) {
+        }
+        else if (process.env.TRAVIS_JOB_ID) {
             return travis();
-        } else {
+        }
+        else {
             return local();
         }
     }
@@ -151,7 +158,8 @@ function record() {
         var deferred = q.defer();
         deferred.resolve();
         return deferred.promise;
-    } else {
+    }
+    else {
         return test('json', true)
             .then(send);
     }
